@@ -1,13 +1,18 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace BT.Model.CustomerData
 {
+    /// <summary>
+    /// Public interface for Customer Repository
+    /// Returns ICustomer interface to prevent external code from directly instantiating Customer objects
+    /// </summary>
     public interface ICustomerRepository
     {
-        List<Customer> GetList();
-        Customer GetNewCustomer();
-        Customer GetCustomerById(int id);
+        List<ICustomer> GetList();
+        ICustomer GetNewCustomer();
+        ICustomer GetCustomerById(int id);
+    }
+});
     }
 }

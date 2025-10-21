@@ -1,85 +1,83 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
-using Dapper;
-
 
 namespace BT.Model.CustomerData
 {
-    public class Customer
+    /// <summary>
+    /// Internal Customer implementation - not exposed directly to consumers
+    /// Consumers must use ICustomer interface and the repository factory
+    /// </summary>
+    internal class Customer : ICustomer
     {
+        private static ICustomerDataAccess _dataAccess = new CustomerDataAccess();
+        private int _id;
+
+        public int Id 
+        { 
+            get { return _id; }
+        }
+
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string CompanyName { get; set; }
         public Address Address { get; set; } = new Address();
 
+        /// <summary>
+        /// Internal method to set the ID (used by data access layer after insert)
+        /// </summary>
+        internal void SetId(int id)
+        {
+            _id = id;
+        }
+
+        /// <summary>
+        /// Saves the customer to the database
+        /// Returns false if validation fails (requires LastName and CompanyName)
+        /// </summary>
         public bool Save()
         {
+            // Validation: customers must have LastName and CompanyName
             if (string.IsNullOrWhiteSpace(LastName) || string.IsNullOrWhiteSpace(CompanyName))
             {
                 return false;
             }
 
-            using (var conn = GetConnection())
+            if (_id == 0)
             {
-                if (Id == 0)
-                {
-                    // Insert
-                    string sql = @"
-                        INSERT INTO Customers (FirstName, LastName, CompanyName, Street, City, State, Zip)
-                        VALUES (@FirstName, @LastName, @CompanyName, @Street, @City, @State, @Zip);
-                        SELECT CAST(SCOPE_IDENTITY() as int)";
-                    
-                    Id = conn.QuerySingle<int>(sql, new
-                    {
-                        FirstName,
-                        LastName,
-                        CompanyName,
-                        Address.Street,
-                        Address.City,
-                        Address.State,
-                        Address.Zip
-                    });
-                }
-                else
-                {
-                    // Update
-                    string sql = @"
-                        UPDATE Customers
-                        SET FirstName = @FirstName,
-                            LastName = @LastName,
-                            CompanyName = @CompanyName,
-                            Street = @Street,
-                            City = @City,
-                            State = @State,
-                            Zip = @Zip
-                        WHERE Id = @Id";
-                    
-                    conn.Execute(sql, new
-                    {
-                        FirstName,
-                        LastName,
-                        CompanyName,
-                        Address.Street,
-                        Address.City,
-                        Address.State,
-                        Address.Zip,
-                        Id
-                    });
-                }
-
-                return true;
+                // Insert new customer
+                _id = _dataAccess.Insert(this);
             }
+            else
+            {
+                // Update existing customer
+                _dataAccess.Update(this);
+            }
+
+            return true;
         }
+
+        /// <summary>
+        /// Deletes the customer from the database
+        /// Returns false if customer has not been saved (Id is 0)
+        /// </summary>
         public bool Delete()
         {
-            if (Id == 0)
+            if (_id == 0)
                 return false;
 
-            using (var conn = GetConnection())
-            {
-                string sql = "DELETE FROM Customers WHERE Id = @Id";
-                conn.Execute(sql, new { Id });
+            _dataAccess.Delete(_id);
+            return true;
+        }
+
+        /// <summary>
+        /// Allows swapping out the data access implementation
+        /// (for testing or changing database technology)
+        /// </summary>
+        internal static void SetDataAccess(ICustomerDataAccess dataAccess)
+        {
+            _dataAccess = dataAccess;
+        }
+    }
+}te(sql, new { Id });
                 return true;
             }
         }

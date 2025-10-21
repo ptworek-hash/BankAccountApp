@@ -1,66 +1,43 @@
 using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Data.SqlClient;
-using Dapper;
 
 namespace BT.Model.CustomerData
 {
+    /// <summary>
+    /// Internal implementation of Customer Repository
+    /// Uses the data access layer to retrieve customers
+    /// </summary>
     internal class CustomerRepository : ICustomerRepository
     {
-        private IDbConnection GetConnection()
+        private readonly ICustomerDataAccess _dataAccess;
+
+        public CustomerRepository() : this(new CustomerDataAccess())
         {
-            var connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
-            return new SqlConnection(connectionString);
         }
 
-        public List<Customer> GetList()
+        // Constructor for dependency injection (useful for testing)
+        internal CustomerRepository(ICustomerDataAccess dataAccess)
         {
-            using (var conn = GetConnection())
-            {
-                string sql = "SELECT * FROM Customers";
-                var results = conn.Query(sql);
-                var customers = new List<Customer>();
-
-                foreach (var row in results)
-                {
-                    customers.Add(MapRowToCustomer(row));
-                }
-                return customers;
-            }
+            _dataAccess = dataAccess;
         }
 
-        public Customer GetNewCustomer()
+        public List<ICustomer> GetList()
+        {
+            var customers = _dataAccess.GetAll();
+            // Convert to ICustomer list
+            return new List<ICustomer>(customers);
+        }
+
+        public ICustomer GetNewCustomer()
         {
             return new Customer();
         }
 
-        public Customer GetCustomerById(int id)
+        public ICustomer GetCustomerById(int id)
         {
-            using (var conn = GetConnection())
-            {
-                string sql = "SELECT * FROM Customers WHERE Id = @Id";
-                var row = conn.QuerySingleOrDefault(sql, new { Id = id });
-                if (row == null) return null;
-
-                return MapRowToCustomer(row);
-            }
+            return _dataAccess.GetById(id);
         }
-
-        private Customer MapRowToCustomer(dynamic row)
-        {
-            return new Customer
-            {
-                Id = row.Id,
-                FirstName = row.FirstName,
-                LastName = row.LastName,
-                CompanyName = row.CompanyName,
-                Address = new Address
-                {
-                    Street = row.Street,
-                    City = row.City,
-                    State = row.State,
-                    Zip = row.Zip
+    }
+}p = row.Zip
                 }
             };
         }
