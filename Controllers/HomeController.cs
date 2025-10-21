@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using BT.Model.Customer;
 
 namespace BankAccountApp.Controllers
 {
@@ -22,9 +23,22 @@ namespace BankAccountApp.Controllers
 		[HttpGet]
         public JsonResult CustomerList()
         {
-            var repo = new CustomerRepository();
-            var customers = repo.GetList();
-            return Json(customers, JsonRequestBehavior.AllowGet);
+			var repo = CustomerFactory.CreateRepository();
+			var customers = repo.GetList();
+			var dto = customers.ConvertAll(c => new {
+				Id = c.Id,
+				FirstName = c.FirstName,
+				LastName = c.LastName,
+				CompanyName = c.CompanyName,
+				Address = new {
+					Street = c.Address?.Street,
+					City = c.Address?.City,
+					State = c.Address?.State,
+					Zip = c.Address?.Zip,
+					AddressBlock = c.Address?.AddressBlock()
+				}
+			});
+			return Json(dto, JsonRequestBehavior.AllowGet);
         }
 	}
 }
