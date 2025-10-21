@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using BT.Model.AccountData;
 
 namespace BankAccountApp.Controllers
 {
@@ -18,13 +19,8 @@ namespace BankAccountApp.Controllers
 		{
 			return PartialView($"Page.{id}");
 		}
-
-		[HttpGet]
-        public JsonResult CustomerList()
-        {
-            var repo = new CustomerRepository();
-            var customers = repo.GetList();
-            return Json(customers, JsonRequestBehavior.AllowGet);
+	}
+}.AllowGet);
         }
 	}
 }
