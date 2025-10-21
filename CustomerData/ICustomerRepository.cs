@@ -6,8 +6,8 @@ namespace BT.Model.CustomerData
 {
     public interface ICustomerRepository
     {
-        List<Customer> GetList();
-        Customer GetNewCustomer();
-        Customer GetCustomerById(int id);
+        List<ICustomer> GetList();
+        ICustomer GetNewCustomer();
+        ICustomer GetCustomerById(int id);
     }
 }

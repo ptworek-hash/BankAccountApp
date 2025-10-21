@@ -1,17 +1,27 @@
 using System;
 using System.Collections.Generic;
+using System.Configuration;
+using System.Data;
+using System.Data.SqlClient;
 using System.Text;
 using Dapper;
 
 
 namespace BT.Model.CustomerData
 {
-    public class Customer
+    public class Customer : ICustomer
     {
+        public int Id { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string CompanyName { get; set; }
         public Address Address { get; set; } = new Address();
+
+        private IDbConnection GetConnection()
+        {
+            var connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
+            return new SqlConnection(connectionString);
+        }
 
         public bool Save()
         {

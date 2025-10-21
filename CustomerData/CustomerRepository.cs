@@ -14,13 +14,13 @@ namespace BT.Model.CustomerData
             return new SqlConnection(connectionString);
         }
 
-        public List<Customer> GetList()
+        public List<ICustomer> GetList()
         {
             using (var conn = GetConnection())
             {
                 string sql = "SELECT * FROM Customers";
                 var results = conn.Query(sql);
-                var customers = new List<Customer>();
+                var customers = new List<ICustomer>();
 
                 foreach (var row in results)
                 {
@@ -30,12 +30,12 @@ namespace BT.Model.CustomerData
             }
         }
 
-        public Customer GetNewCustomer()
+        public ICustomer GetNewCustomer()
         {
             return new Customer();
         }
 
-        public Customer GetCustomerById(int id)
+        public ICustomer GetCustomerById(int id)
         {
             using (var conn = GetConnection())
             {

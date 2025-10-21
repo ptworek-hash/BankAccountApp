@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -19,10 +19,10 @@ namespace BankAccountApp.Controllers
 			return PartialView($"Page.{id}");
 		}
 
-		[HttpGet]
+        [HttpGet]
         public JsonResult CustomerList()
         {
-            var repo = new CustomerRepository();
+            var repo = BT.Model.CustomerData.CustomerRepositoryFactory.Create();
             var customers = repo.GetList();
             return Json(customers, JsonRequestBehavior.AllowGet);
         }
